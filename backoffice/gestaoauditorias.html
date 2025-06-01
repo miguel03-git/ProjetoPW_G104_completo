@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestão de Auditorias</title>
+<!-- Bootstrap CSS e ícones -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+<!-- Usar o mesmo CSS que as outras páginas de gestão -->
+<link href="../../../css/gestaomateriais.css" rel="stylesheet"/>
+<!-- Vue.js -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+<!-- ================= SIDEBAR (IGUAL PARA TODAS AS PÁGINAS) ================= -->
+<aside class="sidebar d-flex flex-column p-3">
+<div class="logo d-flex flex-column align-items-center mb-3">
+<img alt="Logo" src="../../../chat.png" style="width: 70px; height: auto; max-height: 70px; margin-bottom: 10px;"/>
+<h2 class="logo-text" style="font-size:18px; font-weight:bold; text-align:center; margin:0;">EYES EVERYWHERE</h2>
+</div>
+<hr/>
+<ul class="nav flex-column mb-auto">
+<li class="nav-item">
+<a class="nav-link text-white" href="../backoffice/dashboard.html">
+<i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gerirperitos.html">
+<i class="bi bi-person-badge me-2"></i> Gestão de Peritos
+          </a>
+</li>
+<li>
+<a class="nav-link text-white active" href="../backoffice/gestaoauditorias.html">
+<i class="bi bi-clipboard-check me-2"></i> Gestão de Auditorias
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaoocorrencias.html">
+<i class="bi bi-exclamation-triangle me-2"></i> Gestão de Ocorrências
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaomateriais.html">
+<i class="bi bi-box-seam me-2"></i> Gestão de Materiais
+          </a>
+</li>
+</ul>
+<hr/>
+</aside>
+<!-- ================ CONTEÚDO PRINCIPAL ================ -->
+<div class="content">
+<!-- Topbar -->
+<div class="topbar d-flex justify-content-between align-items-center px-3 py-2">
+<div class="search-bar d-flex align-items-center">
+<input class="form-control me-2" placeholder="Procurar auditoria..." type="text" v-model="filtro"/>
+<button class="btn"><i class="bi bi-search"></i></button>
+</div>
+<div class="user-info">
+<span><i class="bi bi-bell"></i> <span class="badge bg-danger"></span></span>
+<span><i class="bi bi-envelope"></i> <span class="badge bg-danger"></span></span>
+<span class="username">Admin</span>
+</div>
+</div>
+<!-- Tabela de Auditorias -->
+<div class="table-container px-3">
+<h2>Auditorias</h2>
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Descrição</th>
+<th>Local</th>
+<th>Equipa</th>
+<th>Data</th>
+<th>Materiais</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr :key="index" v-for="(auditoria, index) in auditoriasFiltradas">
+<td>{{ auditoria.nome }}</td>
+<td>{{ auditoria.descricao }}</td>
+<td>{{ auditoria.local }}</td>
+<td>{{ auditoria.equipa }}</td>
+<td>{{ auditoria.data }}</td>
+<td>{{ auditoria.materiais }}</td>
+<td>
+<button @click="selecionarAuditoria(index)" class="btn btn-primary btn-sm me-1">Editar</button>
+<button @click="removerAuditoria(index)" class="btn btn-danger btn-sm">Apagar</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Formulário de Edição -->
+<div class="form-container px-3" v-if="auditoriaSelecionada !== null">
+<h3>Editar Auditoria</h3>
+<form @submit.prevent="guardarAlteracoes">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" type="text" v-model="auditorias[auditoriaSelecionada].nome"/>
+</div>
+<div class="mb-2">
+<label>Descrição:</label>
+<input class="form-control" type="text" v-model="auditorias[auditoriaSelecionada].descricao"/>
+</div>
+<div class="mb-2">
+<label>Local:</label>
+<input class="form-control" type="text" v-model="auditorias[auditoriaSelecionada].local"/>
+</div>
+<div class="mb-2">
+<label>Equipa:</label>
+<input class="form-control" type="text" v-model="auditorias[auditoriaSelecionada].equipa"/>
+</div>
+<div class="mb-2">
+<label>Data:</label>
+<input class="form-control" type="date" v-model="auditorias[auditoriaSelecionada].data"/>
+</div>
+<div class="mb-2">
+<label>Materiais:</label>
+<input class="form-control" type="text" v-model="auditorias[auditoriaSelecionada].materiais"/>
+</div>
+<button class="btn btn-success" type="submit">Guardar</button>
+<button @click="cancelarEdicao" class="btn btn-secondary ms-2" type="button">Cancelar</button>
+</form>
+</div>
+<!-- Formulário de Adição -->
+<div class="form-container px-3 mt-4">
+<h3>Adicionar Nova Auditoria</h3>
+<form @submit.prevent="adicionarAuditoria">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" required="" type="text" v-model="novaAuditoria.nome"/>
+</div>
+<div class="mb-2">
+<label>Descrição:</label>
+<input class="form-control" required="" type="text" v-model="novaAuditoria.descricao"/>
+</div>
+<div class="mb-2">
+<label>Local:</label>
+<input class="form-control" required="" type="text" v-model="novaAuditoria.local"/>
+</div>
+<div class="mb-2">
+<label>Equipa:</label>
+<input class="form-control" required="" type="text" v-model="novaAuditoria.equipa"/>
+</div>
+<div class="mb-2">
+<label>Data:</label>
+<input class="form-control" required="" type="date" v-model="novaAuditoria.data"/>
+</div>
+<div class="mb-2">
+<label>Materiais:</label>
+<input class="form-control" required="" type="text" v-model="novaAuditoria.materiais"/>
+</div>
+<button class="btn btn-primary" type="submit">Adicionar</button>
+<button @click="limparFormulario" class="btn btn-secondary ms-2" type="button">Limpar</button>
+</form>
+</div>
+</div>
+</div>
+<!-- ================ Vue.js (CRUD + FILTRO) ================ -->
+<!-- Parte relevante apenas do script alterada -->
+<script>
+  Vue.createApp({
+    data() {
+      return {
+        filtro: '',
+        auditorias: [], // Lista vazia, sem exemplos
+        novaAuditoria: { nome: '', descricao: '', local: '', equipa: '', data: '', materiais: '' },
+        auditoriaSelecionada: null
+      };
+    },
+    computed: {
+      auditoriasFiltradas() {
+        if (!this.filtro) return this.auditorias;
+        const termo = this.filtro.toLowerCase();
+        return this.auditorias.filter(a =>
+          a.nome.toLowerCase().includes(termo) ||
+          a.descricao.toLowerCase().includes(termo) ||
+          a.local.toLowerCase().includes(termo) ||
+          a.equipa.toLowerCase().includes(termo) ||
+          a.data.includes(termo) ||
+          a.materiais.toLowerCase().includes(termo)
+        );
+      }
+    },
+    methods: {
+      adicionarAuditoria() {
+        this.auditorias.push({ ...this.novaAuditoria });
+        this.guardarNoLocalStorage();
+        this.limparFormulario();
+      },
+      selecionarAuditoria(index) {
+        this.auditoriaSelecionada = index;
+      },
+      guardarAlteracoes() {
+        this.guardarNoLocalStorage();
+        this.auditoriaSelecionada = null;
+      },
+      removerAuditoria(index) {
+        this.auditorias.splice(index, 1);
+        this.guardarNoLocalStorage();
+      },
+      cancelarEdicao() {
+        this.auditoriaSelecionada = null;
+      },
+      limparFormulario() {
+        this.novaAuditoria = { nome: '', descricao: '', local: '', equipa: '', data: '', materiais: '' };
+      },
+      guardarNoLocalStorage() {
+        localStorage.setItem("auditorias", JSON.stringify(this.auditorias));
+      },
+      carregarDoLocalStorage() {
+        const data = localStorage.getItem("auditorias");
+        if (data) {
+          this.auditorias = JSON.parse(data);
+        }
+      }
+    },
+    mounted() {
+      this.carregarDoLocalStorage();
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

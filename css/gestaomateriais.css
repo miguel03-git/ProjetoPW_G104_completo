@@ -1,0 +1,97 @@
+/* exemplo simplificado baseado no que enviaste */
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+}
+
+.sidebar {
+  width: 250px;
+  background: #00c853;
+  color: #fff;
+  height: 100vh;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+}
+
+.sidebar .nav-link {
+  color: #fff;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.content {
+  margin-left: 250px;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+.topbar {
+  background: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 300px;
+  font-size: 14px;
+}
+
+.search-bar button {
+  padding: 10px 15px;
+  background-color: #00c853;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 14px;
+}
+
+/* Estilos globais para botões de apagar, eliminar e limpar */
+.btn-apagar, .btn-eliminar, .btn-limpar, .eliminar-btn, button.eliminar, .modal-buttons .confirmar {
+  background-color: #95a5a6 !important;
+  color: white !important;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.btn-apagar:hover, .btn-eliminar:hover, .btn-limpar:hover, .eliminar-btn:hover, button.eliminar:hover, .modal-buttons .confirmar:hover {
+  background-color: #e74c3c !important;
+}
+
+/* Para botões Bootstrap padrão usados como apagar/limpar/eliminar */
+.btn-danger, .btn-secondary {
+  background-color: #95a5a6 !important;
+  color: white !important;
+  border: none;
+}
+.btn-danger:hover, .btn-secondary:hover {
+  background-color: #e74c3c !important;
+  color: white !important;
+}
+
+/* Outros estilos que quiseres... */

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eyes Everywhere</title>
+<link href="../../../css/style.css" rel="stylesheet"/>
+<!-- Leaflet CSS -->
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+</head>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+window.addEventListener("load", async function () {
+  const mapa = L.map('mapa', {
+    minZoom: 6,
+    maxZoom: 14,
+    zoomControl: true,
+    maxBounds: [[35.5, -10], [43, -5]]
+  }).setView([39.5, -8.0], 7);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapa);
+
+  const ocorrencias = JSON.parse(localStorage.getItem("ocorrencias")) || [];
+
+  for (const ocorrencia of ocorrencias) {
+    if (!ocorrencia.local) continue;
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ocorrencia.local + ', Portugal')}`);
+      const results = await response.json();
+      if (results.length > 0) {
+        const { lat, lon } = results[0];
+        L.marker([lat, lon])
+          .addTo(mapa)
+          .bindPopup(`<strong>${ocorrencia.tipo}</strong><br>${ocorrencia.local}`);
+      }
+    } catch (e) {
+      console.error("Erro ao geocodificar:", ocorrencia.local, e);
+    }
+  }
+});
+</script>
+<script>
+  window.addEventListener("load", function () {
+    const ocorrencias = JSON.parse(localStorage.getItem("ocorrencias")) || [];
+    const resolvidas = ocorrencias.filter(o => o.estado?.toLowerCase() === "resolvido");
+    document.getElementById("ocorrenciasResolvidas").textContent = resolvidas.length;
+
+    const auditorias = JSON.parse(localStorage.getItem("auditorias")) || [];
+    document.getElementById("auditoriasNum").textContent = auditorias.length;
+  });
+</script>
+<script>
+  window.addEventListener("load", function () {
+    const numEstrelas = 5;
+    const estrelasDiv = document.getElementById("estrelas");
+    const mediaEstrelasSpan = document.getElementById("mediaEstrelas");
+  
+    function renderizarEstrelas() {
+      estrelasDiv.innerHTML = "";
+      for (let i = 1; i <= numEstrelas; i++) {
+        const estrela = document.createElement("span");
+        estrela.innerHTML = "★";
+        estrela.dataset.valor = i;
+        estrela.style.cursor = "pointer";
+        estrela.style.fontSize = "30px";
+        estrela.addEventListener("click", function () {
+          guardarAvaliacao(i);
+        });
+        estrelasDiv.appendChild(estrela);
+      }
+      carregarMinhaAvaliacao();
+      calcularMedia();
+    }
+  
+    function guardarAvaliacao(valor) {
+      let avaliacoes = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+      
+      // Remover a avaliação antiga do utilizador (se existir)
+      const minhaAntiga = parseInt(localStorage.getItem("avaliacaoAtual"));
+      if (minhaAntiga) {
+        const index = avaliacoes.indexOf(minhaAntiga);
+        if (index !== -1) {
+          avaliacoes.splice(index, 1);
+        }
+      }
+  
+      // Guardar nova avaliação
+      avaliacoes.push(valor);
+      localStorage.setItem("avaliacoes", JSON.stringify(avaliacoes));
+      localStorage.setItem("avaliacaoAtual", valor);
+  
+      calcularMedia();
+      atualizarEstrelas(valor); // Atualiza as estrelas visuais para a nova seleção
+    }
+  
+    function calcularMedia() {
+      let avaliacoes = JSON.parse(localStorage.getItem("avaliacoes")) || [];
+      if (avaliacoes.length === 0) {
+        mediaEstrelasSpan.textContent = "0.0";
+        return;
+      }
+      const soma = avaliacoes.reduce((acc, val) => acc + val, 0);
+      const media = soma / avaliacoes.length;
+      mediaEstrelasSpan.textContent = media.toFixed(1);
+    }
+  
+    function atualizarEstrelas(valorSelecionado) {
+      const estrelas = estrelasDiv.querySelectorAll("span");
+      estrelas.forEach(estrela => {
+        if (estrela.dataset.valor <= valorSelecionado) {
+          estrela.classList.add("ativo");
+        } else {
+          estrela.classList.remove("ativo");
+        }
+      });
+    }
+  
+    function carregarMinhaAvaliacao() {
+      const minhaAvaliacao = parseInt(localStorage.getItem("avaliacaoAtual")) || 0;
+      if (minhaAvaliacao) {
+        atualizarEstrelas(minhaAvaliacao);
+      }
+    }
+  
+    renderizarEstrelas();
+  });
+  </script>
+<body>
+<div id="app">
+<header>
+<div class="logo-container">
+<img alt="Logo Eyes Everywhere" class="logo-empresa" src="../../../chat.png"/>
+</div>
+<div class="nav">
+<nav>
+<ul>
+<li><a class="ativo" href="../frontoffice/index.html">Home</a></li>
+<li><a class="apagado" href="../frontoffice/consultarocorrencias.html">Consulta Ocorrências</a></li>
+</ul>
+</nav>
+<div class="auth">
+<a href="../frontoffice/login.html">Entrar</a>
+</div>
+</div>
+</header>
+<main>
+<section class="banner">
+<img alt="Logo EyesEverywhere" class="logo-eyes" src="../../../Novafoto.jpg"/>
+</section>
+<section class="como-funciona">
+<h2>Como funciona:</h2>
+<div class="passos">
+<div>
+<div class="icone-circulo" style="background-image: url('../icone-observacoes.png');"></div>
+<p>Registe as suas observações</p>
+</div>
+<div>
+<div class="icone-circulo" style="background-image: url('../icone-compartilhar.png');"></div>
+<p>Compartilhe connosco</p>
+</div>
+<div>
+<div class="icone-circulo" style="background-image: url('../icone-resolvemos.png');"></div>
+<p>Nós Resolvemos!</p>
+</div>
+</div>
+<div class="linha-verde">
+<span>1</span><span>2</span><span>3</span>
+</div>
+</section>
+<section class="atuacao">
+<h2>Onde atuamos?</h2>
+<div id="mapa" style="height: 400px; border-radius: 10px; margin-bottom: 20px;"></div>
+<p>O serviço está disponível em todo Portugal Continental</p>
+</section>
+<section class="ambiente">
+<h2>Cuidamos do ambiente, ouvimos a natureza</h2>
+<div class="info">
+<div>
+<img alt="Monitorize de perto" class="icon-ambiente" src="../../../PC.png"/>
+<p><strong>Monitorize de perto</strong><br/> Registe ocorrências...</p>
+<img alt="Menos poluição" class="icon-ambiente" src="../../../fabrica.png"/>
+<p><strong>Menos poluição</strong><br/> Proteja o que respira...</p>
+</div>
+<div>
+<img alt="Preserve o verde à sua volta" class="icon-ambiente" src="../../../arvore.png"/>
+<p><strong>Preserve o verde à sua volta</strong><br/> Cuide da natureza.</p>
+<img alt="Seja um cidadão ambientalista" class="icon-ambiente" src="../../../Terra.png"/>
+<p><strong>Seja um cidadão ambientalista</strong><br/> Torne-se consciente.</p>
+</div>
+</div>
+<div class="kpis">
+<div><p>Número de auditorias realizadas</p><span id="auditoriasNum">0</span></div>
+<div><p>Ocorrências registadas e resolvidas</p><span id="ocorrenciasResolvidas">0</span></div>
+<div><p>Tempo médio de resposta</p><span>0h0m</span></div>
+<div>
+<p>Satisfação dos cidadãos</p>
+<span id="mediaEstrelas">0.0</span>
+<div class="avaliacao">
+<div class="estrelas" id="estrelas">
+<!-- Vamos gerar as estrelas via JavaScript -->
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="form-ocorrencia">
+<h3>Registe aqui a sua ocorrência</h3>
+<form>
+<label for="tipo">Tipo de Ocorrência:</label>
+<select id="tipo" name="tipo" required="">
+<option disabled="" selected="" value="">Escolha o tipo</option>
+<option>Incêndio</option>
+<option>Árvore Caída</option>
+<option>Cheias</option>
+<option>Contentores Vandalizados</option>
+</select>
+<label for="local">Local (Morada + Cod. Postal):</label>
+<input id="local" name="local" placeholder="Local (Morada + Cod. Postal)" required="" type="text"/>
+<label for="descricao">Descrição da ocorrência:</label>
+<textarea id="descricao" name="descricao" placeholder="Descrição da ocorrência" required=""></textarea>
+<label for="ficheiro">Anexar documentos/imagens:</label>
+<input id="ficheiro" multiple="" name="ficheiro" type="file"/>
+<button type="submit">Enviar</button>
+</form>
+</section>
+<section class="contacto">
+<h3>Entre em contacto</h3>
+<form>
+<input placeholder="Nome" required="" type="text"/>
+<input placeholder="Email" required="" type="email"/>
+<textarea placeholder="Mensagem" required=""></textarea>
+<button type="submit">Enviar</button>
+</form>
+</section>
+</main>
+<script src="../../../js/script.js"></script>
+</div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="../../../js/script.js"></script>
+<script>
+  window.addEventListener("load", function () {
+    const form = document.querySelector(".form-ocorrencia form");
+  
+    if (!form) {
+      alert("❌ Formulário não encontrado.");
+      return;
+    }
+  
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+  
+      const tipo = form.querySelector('#tipo').value;
+      const local = form.querySelector('input[placeholder="Local (Morada + Cod. Postal)"]').value;
+      const descricao = form.querySelector('textarea').value;
+      const ficheiroInput = form.querySelector('#ficheiro');
+      const ficheiro = ficheiroInput.files[0];
+      const data = new Date().toLocaleString();
+      const estado = "Pendente";
+  
+      if (ficheiro) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const ficheiroBase64 = reader.result;
+  
+          const novaOcorrencia = {
+            tipo,
+            local,
+            descricao,
+            ficheiroNome: ficheiro.name,
+            ficheiroBase64,
+            data,
+            estado
+          };
+  
+          guardarOcorrencia(novaOcorrencia);
+        };
+        reader.onerror = function () {
+          alert("Erro ao ler o ficheiro.");
+        };
+        reader.readAsDataURL(ficheiro);
+      } else {
+        const novaOcorrencia = {
+          tipo,
+          local,
+          descricao,
+          ficheiroNome: '',
+          ficheiroBase64: '',
+          data,
+          estado
+        };
+  
+        guardarOcorrencia(novaOcorrencia);
+      }
+  
+      function guardarOcorrencia(ocorrencia) {
+        try {
+          const lista = JSON.parse(localStorage.getItem("ocorrencias")) || [];
+          lista.push(ocorrencia);
+          localStorage.setItem("ocorrencias", JSON.stringify(lista));
+          alert("✅ Ocorrência registada com sucesso!");
+          form.reset();
+        } catch (error) {
+          console.error("Erro ao guardar:", error);
+          alert("❌ Erro ao guardar ocorrência.");
+        }
+      }
+    });
+  });
+  </script>
+</body>
+</html>

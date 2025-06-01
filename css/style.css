@@ -1,0 +1,271 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f5f5f5;
+}
+
+header {
+  background: #444;
+  color: white;
+  padding: 10px 30px;
+  position: relative;
+}
+
+.logo-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.logo-empresa {
+  height: 73px;
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav ul {
+  margin-left: 180px;
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+}
+
+.nav ul li a.apagado {
+  color: #cccccc; /* cor cinza mais clara */
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.nav ul li a.ativo {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.auth {
+  position: absolute;
+  top: 15px;
+  right: 30px;
+}
+
+.auth a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.banner {
+  width: 100vw;
+  height: 70vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-eyes {
+  width: 100vw;
+  height: 100vh;
+  object-fit: fill; /* ← força espalmamento para preencher tudo */
+  display: block;
+} 
+
+main section {
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.como-funciona .passos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* garante alinhamento consistente */
+  gap: 100px; /* ajusta conforme necessário */
+  margin: 40px 0;
+  text-align: center;
+}
+.como-funciona .passos > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 160px;
+}
+
+.icone-circulo {
+  width: 93.33px;
+  height: 93.33px;
+  background-color: #219816;
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 93.33px;
+  box-shadow: 0px 0px 0px 7px #FFFFFF, 0px 0px 0px 8px #E0E0E0;
+  margin: 0 auto 10px auto;
+}
+
+.linha-verde {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+  position: relative;
+}
+
+.linha-verde::before {
+  content: "";
+  position: absolute;
+  height: 4px;
+  background-color: #55721c;
+  width: 60%;
+  top: 50%;
+  z-index: 0;
+}
+
+.linha-verde span {
+  width: 30px;
+  height: 30px;
+  background-color: #55721c;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 115px;
+  z-index: 1;
+}
+
+.atuacao .mapa {
+  height: 227px;
+  margin: 20px 0;
+}
+
+.ambiente {
+  background-color: #e9f2dc;
+}
+
+.ambiente .info {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.ambiente .kpis {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.icon-ambiente {
+  height: 100px;
+  margin: 20px 0 10px 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form-ocorrencia form,
+.contacto form {
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  margin: auto;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+input, textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.avaliacao {
+  margin-top: 10px;
+}
+
+#avaliarBtn {
+  background-color: #55721c;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.estrelas {
+  margin-top: 10px;
+  font-size: 24px;
+}
+
+.estrelas span {
+  cursor: pointer;
+  color: #ccc;
+}
+
+.estrelas span.selecionada {
+  color: gold;
+}
+
+.hidden {
+  display: none;
+}
+.avaliacao {
+  margin-top: 10px;
+}
+
+#avaliarBtn {
+  background-color: #55721c;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.estrelas {
+  margin-top: 10px;
+  font-size: 24px;
+}
+
+.estrelas span {
+  cursor: pointer;
+  color: #ccc;
+}
+
+.estrelas span.selecionada {
+  color: gold;
+}
+
+.hidden {
+  display: none;
+}
+.estrelas span {
+  font-size: 24px;
+  cursor: pointer;
+  color: gray;
+  transition: color 0.2s;
+}
+
+.estrelas span.ativo,
+.estrelas span:hover {
+  color: gold;
+}

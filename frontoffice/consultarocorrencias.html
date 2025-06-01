@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Consultar Ocorrências</title>
+<link href="../../../css/consultarocorrencias.css" rel="stylesheet"/>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+<!-- 🔁 CÓPIA EXATA DA BARRA DO index.html -->
+<header>
+<div class="logo-container">
+<img alt="Logo Eyes Everywhere" class="logo-empresa" src="../../../chat.png"/>
+</div>
+<div class="nav">
+<nav>
+<ul>
+<li><a class="apagado" href="../frontoffice/index.html">Home</a></li>
+<li><a class="ativo" href="../frontoffice/consultarocorrencias.html">Consulta Ocorrências</a></li>
+</ul>
+</nav>
+<div class="auth">
+<a href="../frontoffice/login.html">Entrar</a>
+</div>
+</div>
+</header>
+<!-- 📄 CONTEÚDO DA PÁGINA -->
+<main class="main-content">
+<div class="table-container">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<h2>Consulta de Ocorrências</h2>
+<div class="search-bar">
+<input placeholder="Procurar por tipo ou local..." type="text" v-model="filtro"/>
+<button @click.prevent="">🔍</button>
+</div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Tipo de Ocorrência</th>
+<th>Data</th>
+<th>Localização</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr :key="index" v-for="(ocorrencia, index) in ocorrenciasFiltradas">
+<td>{{ ocorrencia.tipo }}</td>
+<td>{{ ocorrencia.data }}</td>
+<td>{{ ocorrencia.local }}</td>
+<td>{{ ocorrencia.estado }}</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+<!-- Vue app -->
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          ocorrencias: [],
+          filtro: ''
+        };
+      },
+      computed: {
+        ocorrenciasFiltradas() {
+          return this.ocorrencias.filter(o =>
+            o.tipo.toLowerCase().includes(this.filtro.toLowerCase()) ||
+            o.local.toLowerCase().includes(this.filtro.toLowerCase())
+          );
+        }
+      },
+      mounted() {
+        const dados = localStorage.getItem("ocorrencias");
+        this.ocorrencias = dados ? JSON.parse(dados) : [];
+      }
+    }).mount("#app");
+  </script>
+</body>
+</html>

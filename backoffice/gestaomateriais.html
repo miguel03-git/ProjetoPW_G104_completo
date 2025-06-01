@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Gestão de Materiais</title>
+<!-- Bootstrap CSS e ícones -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+<!-- CSS próprio -->
+<link href="../../../css/gestaomateriais.css" rel="stylesheet"/>
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+<!-- SIDEBAR -->
+<aside class="sidebar d-flex flex-column p-3">
+<div class="logo d-flex flex-column align-items-center mb-3">
+<img alt="Logo" src="../../../chat.png" style="width: 70px; max-height: 70px; margin-bottom: 10px;"/>
+<h2 class="logo-text" style="font-size:18px; font-weight:bold; text-align:center; margin:0;">EYES EVERYWHERE</h2>
+</div>
+<hr/>
+<ul class="nav flex-column mb-auto">
+<li class="nav-item">
+<a class="nav-link text-white" href="../backoffice/dashboard.html">
+<i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gerirperitos.html">
+<i class="bi bi-person-badge me-2"></i> Gestão de Peritos
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaoauditorias.html">
+<i class="bi bi-clipboard-check me-2"></i> Gestão de Auditorias
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaoocorrencias.html">
+<i class="bi bi-exclamation-triangle me-2"></i> Gestão de Ocorrências
+          </a>
+</li>
+<li>
+<a class="nav-link text-white active" href="../backoffice/gestaomateriais.html">
+<i class="bi bi-box-seam me-2"></i> Gestão de Materiais
+          </a>
+</li>
+</ul>
+<hr/>
+</aside>
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="content">
+<!-- Topbar -->
+<div class="topbar d-flex justify-content-between align-items-center px-3 py-2">
+<div class="search-bar d-flex align-items-center">
+<input class="form-control me-2" placeholder="Procurar material..." type="text" v-model="filtro"/>
+<button class="btn"><i class="bi bi-search"></i></button>
+</div>
+<div class="user-info">
+<span><i class="bi bi-bell"></i> <span class="badge bg-danger"></span></span>
+<span><i class="bi bi-envelope"></i> <span class="badge bg-danger"></span></span>
+<span class="username">Admin</span>
+</div>
+</div>
+<!-- Tabela de Materiais -->
+<div class="table-container px-3">
+<h2>Materiais</h2>
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Descrição</th>
+<th>Quantidade</th>
+<th>Local</th>
+<th>Tipo</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr :key="index" v-for="(material, index) in materiaisFiltrados">
+<td>{{ material.nome }}</td>
+<td>{{ material.descricao }}</td>
+<td>{{ material.quantidade }}</td>
+<td>{{ material.local }}</td>
+<td>{{ material.tipo }}</td>
+<td>
+<button @click="selecionarMaterial(index)" class="btn btn-primary btn-sm me-1">Editar</button>
+<button @click="removerMaterial(index)" class="btn btn-danger btn-sm">Apagar</button>
+</td>
+</tr>
+<tr v-if="materiaisFiltrados.length === 0">
+<td class="text-center" colspan="6">Nenhum material encontrado.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Formulário de Edição -->
+<div class="form-container px-3" v-if="materialSelecionado !== null">
+<h3>Editar Material</h3>
+<form @submit.prevent="guardarAlteracoes">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" required="" type="text" v-model="materiais[materialSelecionado].nome"/>
+</div>
+<div class="mb-2">
+<label>Descrição:</label>
+<input class="form-control" required="" type="text" v-model="materiais[materialSelecionado].descricao"/>
+</div>
+<div class="mb-2">
+<label>Quantidade:</label>
+<input class="form-control" min="0" required="" type="number" v-model.number="materiais[materialSelecionado].quantidade"/>
+</div>
+<div class="mb-2">
+<label>Local:</label>
+<input class="form-control" required="" type="text" v-model="materiais[materialSelecionado].local"/>
+</div>
+<div class="mb-2">
+<label>Tipo:</label>
+<select class="form-control" required="" v-model="materiais[materialSelecionado].tipo">
+<option value="">Selecione o tipo</option>
+<option value="monitorização">Monitorização</option>
+<option value="segurança">Segurança</option>
+<option value="eficiência energética">Eficiência Energética</option>
+<option value="energia renovável">Energia Renovável</option>
+<option value="recurso hídrico">Recurso Hídrico</option>
+<option value="reciclagem">Reciclagem</option>
+<option value="documentação">Documentação</option>
+</select>
+</div>
+<button class="btn btn-success" type="submit">Guardar</button>
+<button @click="cancelarEdicao" class="btn btn-secondary ms-2" type="button">Cancelar</button>
+</form>
+</div>
+<!-- Formulário de Adição -->
+<div class="form-container px-3 mt-4">
+<h3>Adicionar Novo Material</h3>
+<form @submit.prevent="adicionarMaterial">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" required="" type="text" v-model="novoMaterial.nome"/>
+</div>
+<div class="mb-2">
+<label>Descrição:</label>
+<input class="form-control" required="" type="text" v-model="novoMaterial.descricao"/>
+</div>
+<div class="mb-2">
+<label>Quantidade:</label>
+<input class="form-control" min="0" required="" type="number" v-model.number="novoMaterial.quantidade"/>
+</div>
+<div class="mb-2">
+<label>Local:</label>
+<input class="form-control" required="" type="text" v-model="novoMaterial.local"/>
+</div>
+<div class="mb-2">
+<label>Tipo:</label>
+<select class="form-control" required="" v-model="novoMaterial.tipo">
+<option value="">Selecione o tipo</option>
+<option value="monitorização">Monitorização</option>
+<option value="segurança">Segurança</option>
+<option value="eficiência energética">Eficiência Energética</option>
+<option value="energia renovável">Energia Renovável</option>
+<option value="recurso hídrico">Recurso Hídrico</option>
+<option value="reciclagem">Reciclagem</option>
+<option value="documentação">Documentação</option>
+</select>
+</div>
+<button class="btn btn-primary" type="submit">Adicionar</button>
+<button @click="limparFormulario" class="btn btn-secondary ms-2" type="button">Limpar</button>
+</form>
+</div>
+</div>
+</div>
+<!-- Script Vue separado -->
+<script src="../../../js/gestaomateriais.js"></script>
+</body>
+</html>

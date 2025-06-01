@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestão de Peritos</title>
+<!-- Bootstrap CSS e ícones -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+<!-- Usar o mesmo CSS que as outras páginas de gestão -->
+<link href="../../../css/gestaomateriais.css" rel="stylesheet"/>
+<!-- Vue.js -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<style>
+    /* Pequenos ajustes para o modal de confirmação */
+    .modal-backdrop-custom {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1040;
+    }
+    .modal-custom {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      z-index: 1050;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .modal-custom h3 {
+      margin-bottom: 15px;
+      font-size: 1.25rem;
+    }
+    .modal-custom .alerta {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+    .modal-custom .alerta strong {
+      margin-left: 5px;
+    }
+    .modal-custom .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .modal-custom .modal-buttons .btn {
+      min-width: 100px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+<!-- ================= SIDEBAR (IGUAL PARA TODAS AS PÁGINAS) ================= -->
+<aside class="sidebar d-flex flex-column p-3">
+<div class="logo d-flex flex-column align-items-center mb-3">
+<img alt="Logo" src="../../../chat.png" style="width: 70px; height: auto; max-height: 70px; margin-bottom: 10px;"/>
+<h2 class="logo-text" style="font-size:18px; font-weight:bold; text-align:center; margin:0;">EYES EVERYWHERE</h2>
+</div>
+<hr/>
+<ul class="nav flex-column mb-auto">
+<li class="nav-item">
+<a class="nav-link text-white" href="../backoffice/dashboard.html">
+<i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+</li>
+<li>
+<a class="nav-link text-white active" href="../backoffice/gerirperitos.html">
+<i class="bi bi-person-badge me-2"></i> Gestão de Peritos
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaoauditorias.html">
+<i class="bi bi-clipboard-check me-2"></i> Gestão de Auditorias
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaoocorrencias.html">
+<i class="bi bi-exclamation-triangle me-2"></i> Gestão de Ocorrências
+          </a>
+</li>
+<li>
+<a class="nav-link text-white" href="../backoffice/gestaomateriais.html">
+<i class="bi bi-box-seam me-2"></i> Gestão de Materiais
+          </a>
+</li>
+</ul>
+<hr/>
+</aside>
+<!-- ================ CONTEÚDO PRINCIPAL ================ -->
+<div class="content">
+<!-- Topbar -->
+<div class="topbar d-flex justify-content-between align-items-center px-3 py-2">
+<div class="search-bar d-flex align-items-center">
+<input class="form-control me-2" placeholder="Procurar perito..." type="text" v-model="filtro"/>
+<button class="btn"><i class="bi bi-search"></i></button>
+</div>
+<div class="user-info">
+<span><i class="bi bi-bell"></i> <span class="badge bg-danger">3</span></span>
+<span><i class="bi bi-envelope"></i> <span class="badge bg-danger">7</span></span>
+<span class="username">Admin</span>
+</div>
+</div>
+<!-- ========== Tabela de Peritos ========== -->
+<div class="table-container px-3">
+<h2>Peritos</h2>
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Sobrenome</th>
+<th>Email</th>
+<th>Telemóvel</th>
+<th>Área</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr :key="index" v-for="(perito, index) in peritosFiltrados">
+<td>{{ perito.nome }}</td>
+<td>{{ perito.sobrenome }}</td>
+<td>{{ perito.email }}</td>
+<td>{{ perito.telemovel }}</td>
+<td>{{ perito.area }}</td>
+<td>
+<button @click="selecionarPerito(index)" class="btn btn-primary btn-sm me-1">
+                  Editar
+                </button>
+<button @click="abrirModal(index)" class="btn btn-danger btn-sm">
+                  Eliminar
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- ========== Formulário de Edição ========== -->
+<div class="form-container px-3" v-if="peritoSelecionado !== null">
+<h3>Editar Perito</h3>
+<form @submit.prevent="guardarAlteracoes">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" type="text" v-model="peritos[peritoSelecionado].nome"/>
+</div>
+<div class="mb-2">
+<label>Sobrenome:</label>
+<input class="form-control" type="text" v-model="peritos[peritoSelecionado].sobrenome"/>
+</div>
+<div class="mb-2">
+<label>Data de Nascimento:</label>
+<input class="form-control" type="date" v-model="peritos[peritoSelecionado].dataNascimento"/>
+</div>
+<div class="mb-2">
+<label>Género:</label><br/>
+<div class="form-check form-check-inline">
+<input class="form-check-input" id="genMas" type="radio" v-model="peritos[peritoSelecionado].genero" value="masculino"/>
+<label class="form-check-label" for="genMas">Masculino</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" id="genFem" type="radio" v-model="peritos[peritoSelecionado].genero" value="feminino"/>
+<label class="form-check-label" for="genFem">Feminino</label>
+</div>
+</div>
+<div class="mb-2">
+<label>Email:</label>
+<input class="form-control" type="email" v-model="peritos[peritoSelecionado].email"/>
+</div>
+<div class="mb-2">
+<label>Telemóvel:</label>
+<input class="form-control" type="tel" v-model="peritos[peritoSelecionado].telemovel"/>
+</div>
+<div class="mb-2">
+<label>Área:</label>
+<select class="form-control" v-model="peritos[peritoSelecionado].area">
+<option disabled="" value="">Escolha a opção</option>
+<option value="Ambiental">Ambiental</option>
+<option value="Segurança">Segurança</option>
+</select>
+</div>
+<button class="btn btn-success" type="submit">Guardar</button>
+<button @click="cancelarEdicao" class="btn btn-secondary ms-2" type="button">
+            Cancelar
+          </button>
+</form>
+</div>
+<!-- ========== Formulário de Adição ========== -->
+<div class="form-container px-3 mt-4">
+<h3>Registar Novo Perito</h3>
+<form @submit.prevent="adicionarPerito">
+<div class="mb-2">
+<label>Nome:</label>
+<input class="form-control" required="" type="text" v-model="novoPerito.nome"/>
+</div>
+<div class="mb-2">
+<label>Sobrenome:</label>
+<input class="form-control" required="" type="text" v-model="novoPerito.sobrenome"/>
+</div>
+<div class="mb-2">
+<label>Data de Nascimento:</label>
+<input class="form-control" required="" type="date" v-model="novoPerito.dataNascimento"/>
+</div>
+<div class="mb-2">
+<label>Género:</label><br/>
+<div class="form-check form-check-inline">
+<input class="form-check-input" id="newGenMas" type="radio" v-model="novoPerito.genero" value="masculino"/>
+<label class="form-check-label" for="newGenMas">Masculino</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" id="newGenFem" type="radio" v-model="novoPerito.genero" value="feminino"/>
+<label class="form-check-label" for="newGenFem">Feminino</label>
+</div>
+</div>
+<div class="mb-2">
+<label>Email:</label>
+<input class="form-control" required="" type="email" v-model="novoPerito.email"/>
+</div>
+<div class="mb-2">
+<label>Telemóvel:</label>
+<input class="form-control" required="" type="tel" v-model="novoPerito.telemovel"/>
+</div>
+<div class="mb-2">
+<label>Área:</label>
+<select class="form-control" required="" v-model="novoPerito.area">
+<option disabled="" value="">Escolha a opção</option>
+<option value="Ambiental">Ambiental</option>
+<option value="Segurança">Segurança</option>
+</select>
+</div>
+<button class="btn btn-primary" type="submit">Registar</button>
+<button @click="limparFormulario" class="btn btn-secondary ms-2" type="button">
+            Limpar
+          </button>
+</form>
+</div>
+<!-- ========== Modal de Confirmação de Eliminação ========== -->
+<div v-if="mostrarModal">
+<div class="modal-backdrop-custom"></div>
+<div class="modal-custom">
+<h3>Eliminar Perito</h3>
+<p>Tem a certeza que quer eliminar este perito?</p>
+<div class="alerta">
+            ⚠️ <strong>Atenção:</strong> Ao excluir este perito, ele não poderá aceder ao sistema.
+          </div>
+<div class="modal-buttons">
+<button @click="fecharModal" class="btn btn-secondary">Não, cancelar</button>
+<button @click="confirmarEliminacao" class="btn btn-danger">Sim, eliminar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================ Vue.js (CRUD + FILTRO + DELETE MODAL + STORAGE) ================ -->
+<script>
+    Vue.createApp({
+      data() {
+        return {
+          filtro: '',
+          peritos: [],
+          novoPerito: {
+            nome: '',
+            sobrenome: '',
+            dataNascimento: '',
+            genero: 'masculino',
+            email: '',
+            telemovel: '',
+            area: ''
+          },
+          peritoSelecionado: null,
+          indiceAEliminar: null,
+          mostrarModal: false
+        };
+      },
+      created() {
+        const saved = localStorage.getItem('peritos');
+        if (saved) {
+          try {
+            this.peritos = JSON.parse(saved);
+          } catch (e) {
+            console.error('Erro ao ler peritos do localStorage', e);
+          }
+        } else {
+          // Exemplos iniciais
+          this.peritos = [
+            {
+              nome: 'João',
+              sobrenome: 'Silva',
+              dataNascimento: '1980-05-12',
+              genero: 'masculino',
+              email: 'joao.silva@gmail.com',
+              telemovel: '912345678',
+              area: 'Ambiental'
+            },
+            {
+              nome: 'Maria',
+              sobrenome: 'Costa',
+              dataNascimento: '1975-11-30',
+              genero: 'feminino',
+              email: 'maria.costa@gmail.com',
+              telemovel: '923456789',
+              area: 'Segurança'
+            }
+          ];
+        }
+      },
+      watch: {
+        peritos: {
+          handler(newList) {
+            localStorage.setItem('peritos', JSON.stringify(newList));
+          },
+          deep: true
+        }
+      },
+      computed: {
+        peritosFiltrados() {
+          if (!this.filtro) return this.peritos;
+          const termo = this.filtro.toLowerCase();
+          return this.peritos.filter(p =>
+            p.nome.toLowerCase().includes(termo) ||
+            p.sobrenome.toLowerCase().includes(termo) ||
+            p.email.toLowerCase().includes(termo) ||
+            p.telemovel.toLowerCase().includes(termo) ||
+            p.area.toLowerCase().includes(termo)
+          );
+        }
+      },
+      methods: {
+        adicionarPerito() {
+          this.peritos.push({ ...this.novoPerito });
+          this.limparFormulario();
+        },
+        selecionarPerito(index) {
+          this.peritoSelecionado = index;
+        },
+        guardarAlteracoes() {
+          this.peritoSelecionado = null;
+        },
+        abrirModal(index) {
+          this.indiceAEliminar = index;
+          this.mostrarModal = true;
+        },
+        fecharModal() {
+          this.mostrarModal = false;
+          this.indiceAEliminar = null;
+        },
+        confirmarEliminacao() {
+          this.peritos.splice(this.indiceAEliminar, 1);
+          this.fecharModal();
+        },
+        cancelarEdicao() {
+          this.peritoSelecionado = null;
+        },
+        limparFormulario() {
+          this.novoPerito = {
+            nome: '',
+            sobrenome: '',
+            dataNascimento: '',
+            genero: 'masculino',
+            email: '',
+            telemovel: '',
+            area: ''
+          };
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

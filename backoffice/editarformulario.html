@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Editar Perito</title>
+<link href="../../../css/editarformulario.css" rel="stylesheet"/>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+<div id="app">
+<div class="sidebar">
+<div class="logo">
+<img alt="Logo" src="../../../chat.png"/>
+<h2 class="logo-text">EYES EVERYWHERE</h2>
+</div>
+<ul>
+<li><a href="../backoffice/../html/dashboard.html"><strong>Dashboard</strong></a></li>
+<li class="submenu open">
+<div @click="toggleSubmenu" class="submenu-toggle">
+<strong>Gestão de Peritos</strong> <span class="arrow">▶</span>
+</div>
+<ul :class="{ hidden: !submenuAberto }" id="submenu-items">
+<li><a href="../backoffice/../html/registoperito.html">Registar Perito</a></li>
+<li><a href="../backoffice/../html/eliminarperito.html">Eliminar Perito</a></li>
+<li class="active"><a href="../backoffice/../html/editarperito.html">Editar Perito</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="main-content">
+<div class="top-bar">
+<div class="search-bar">
+<input placeholder="Procurar por..." type="text"/>
+<button>🔍</button>
+</div>
+<div class="user-info">
+<span>🔔 🔴</span>
+<span class="username">Admin</span>
+</div>
+</div>
+<div class="form-container">
+<form @submit.prevent="guardarAlteracoes">
+<h2>Editar Perito</h2>
+<div class="form-group">
+<input placeholder="Nome" required="" type="text" v-model="perito.nome"/>
+<input placeholder="Sobrenome" required="" type="text" v-model="perito.sobrenome"/>
+</div>
+<div class="form-group">
+<input required="" type="date" v-model="perito.dataNascimento"/>
+<div class="genero">
+<label><input type="radio" v-model="perito.genero" value="masculino"/> Masculino</label>
+<label><input type="radio" v-model="perito.genero" value="feminino"/> Feminino</label>
+</div>
+</div>
+<div class="form-group">
+<input placeholder="Email" required="" type="email" v-model="perito.email"/>
+<input placeholder="Número Telemóvel" required="" type="tel" v-model="perito.telemovel"/>
+</div>
+<div class="form-group">
+<select required="" v-model="perito.area">
+<option value="">Escolha a opção</option>
+<option value="ambiental">Ambiental</option>
+<option value="seguranca">Segurança</option>
+</select>
+</div>
+<button type="submit">Guardar Alterações</button>
+</form>
+</div>
+</div>
+</div>
+<script src="../../../js/editarformulario.js"></script>
+</body>
+</html>
